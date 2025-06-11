@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Viktorīna</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f8;
+      margin: 0;
+      padding: 0;
+    }
+    header, footer {
+      background-color: #0077cc;
+      color: white;
+      text-align: center;
+      padding: 1em;
+    }
+    main {
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #quiz-container, #result-container {
+      background-color: white;
+      padding: 1.5em;
+      border-radius: 10px;
+      max-width: 600px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 1em;
+      border-radius: 8px;
+    }
+    #answers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5em;
+    }
+    button {
+      padding: 0.7em 1em;
+      font-size: 1em;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Attēlu viktorīna</h1>
+  </header>
+
+  <main>
+    <div id="quiz-container">
+      <img id="question-image" src="" alt="Jautājuma attēls" />
+      <h2 id="question-text"></h2>
+      <div id="answers"></div>
+      <button id="next-btn" class="hidden">Nākamais jautājums</button>
+    </div>
+
+    <div id="result-container" class="hidden">
+      <h2>Tavs rezultāts:</h2>
+      <p id="score"></p>
+      <p id="motivation"></p>
+      <p>Pēdējā mēģinājuma rezultāts: <span id="last-score"></span></p>
+      <button onclick="restartQuiz()">Sākt no jauna</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Viktorīna</p>
+  </footer>
+
+  <script>
+    const questions = [
+      {
+        image: "documents/question1.jpg",
+        text: "Kas redzams šajā attēlā?",
+        answers: ["Kaķis", "Suns", "Lācis", "Putns"],
+        correct: 1
+      },
+      {
+        image: "documents/question2.jpg",
+        text: "Kura valsts karogs tas ir?",
+        answers: ["Latvija", "Igaunija", "Lietuva", "Polija"],
+        correct: 2
+      },
+      {
+        image: "documents/question3.jpg",
+        text: "Kāds transporta līdzeklis ir redzams?",
+        answers: ["Autobuss", "Vilciens", "Tramvajs", "Lidmašīna"],
+        correct: 1
+      },
+      {
+        image: "documents/question4.jpg",
+        text: "Kāds gadalaiks attēlots?",
+        answers: ["Pavasaris", "Vasara", "Rudens", "Ziema"],
+        correct: 3
+      },
+      {
+        image: "documents/question5.jpg",
+        text: "Kas ir šis ēdiens?",
+        answers: ["Pizza", "Siers", "Zupa", "Saldējums"],
+        correct: 0
+      },
+      {
+        image: "documents/question6.jpg",
+        text: "Kur atrodas šī ēka?",
+        answers: ["Parīze", "Rīga", "Roma", "Londona"],
+        correct: 1
+      },
+      {
+        image: "documents/question7.jpg",
+        text: "Kāds sporta veids tiek spēlēts?",
+        answers: ["Basketbols", "Futbols", "Teniss", "Hokejs"],
+        correct: 3
+      },
+      {
+        image: "documents/question8.jpg",
+        text: "Kurš dzīvnieks ir plēsējs?",
+        answers: ["Lapsa", "Govs", "Kaza", "Aita"],
+        correct: 0
+      },
+      {
+        image: "documents/question9.jpg",
+        text: "Kāda krāsa dominē šajā attēlā?",
+        answers: ["Sarkana", "Zila", "Zaļa", "Dzeltena"],
+        correct: 2
+      },
+      {
+        image: "documents/question10.jpg",
+        text: "Kas attēlots debesīs?",
+        answers: ["Saule", "Mēness", "Zvaigznes", "Mākonis"],
+        correct: 0
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    const img = document.getElementById("question-image");
+    const text = document.getElementById("question-text");
+    const answers = document.getElementById("answers");
+    const nextBtn = document.getElementById("next-btn");
+    const quiz = document.getElementById("quiz-container");
+    const result = document.getElementById("result-container");
+
+    function loadQuestion() {
+      const q = questions[current];
+      img.src = q.image;
+      text.textContent = q.text;
+      answers.innerHTML = "";
+      nextBtn.classList.add("hidden");
+
+      q.answers.forEach((ans, idx) => {
+        const btn = document.createElement("button");
+        btn.textContent = ans;
+        btn.onclick = () => {
+          if (idx === q.correct) score++;
+          nextBtn.classList.remove("hidden");
+          Array.from(answers.children).forEach(b => b.disabled = true);
+        };
+        answers.appendChild(btn);
+      });
+    }
+
+    nextBtn.onclick = () => {
+      current++;
+      if (current < questions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    };
+
+    function showResults() {
+      quiz.classList.add("hidden");
+      result.classList.remove("hidden");
+      document.getElementById("score").textContent = `${score} no ${questions.length}`;
+
+      let message = score === questions.length
+        ? "Izcili! Tu atbildēji uz visiem jautājumiem pareizi!"
+        : score >= 7
+        ? "Lielisks rezultāts, turpini trenēties!"
+        : "Nekas, nākamreiz būs labāk!";
+
+      document.getElementById("motivation").textContent = message;
+
+      localStorage.setItem("lastScore", score);
+      document.getElementById("last-score").textContent = localStorage.getItem("lastScore");
+    }
+
+    function restartQuiz() {
+      score = 0;
+      current = 0;
+      result.classList.add("hidden");
+      quiz.classList.remove("hidden");
+      loadQuestion();
+    }
+
+    // start quiz
+    window.onload = () => {
+      loadQuestion();
+      const last = localStorage.getItem("lastScore");
+      if (last) document.getElementById("last-score").textContent = last;
+    };
+  </script>
+</body>
+</html>
